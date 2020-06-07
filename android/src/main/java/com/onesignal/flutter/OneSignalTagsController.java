@@ -59,13 +59,21 @@ class OSFlutterChangeTagsHandler extends FlutterRegistrarResponder implements Ch
 
     @Override
     public void tagsAvailable(JSONObject jsonObject) {
-        if (this.replySubmitted.getAndSet(true))
-            return;
+
+        try {
+            if (this.replySubmitted.getAndSet(true))
+                return;
+        }catch (NullPointerException e1){
+            replyError(result, "OneSignal", "Encountered an error serializing tags into hashmap: " + e1.getMessage() + "\n" + e1.getStackTrace(), null);
+        }
+
 
         try {
             replySuccess(result, OneSignalSerializer.convertJSONObjectToHashMap(jsonObject));
         } catch (JSONException exception) {
             replyError(result, "OneSignal", "Encountered an error serializing tags into hashmap: " + exception.getMessage() + "\n" + exception.getStackTrace(), null);
+        } catch (NullPointerException e){
+            replyError(result, "OneSignal", "Encountered an error serializing tags into hashmap: " + e.getMessage() + "\n" + e.getStackTrace(), null);
         }
     }
 }

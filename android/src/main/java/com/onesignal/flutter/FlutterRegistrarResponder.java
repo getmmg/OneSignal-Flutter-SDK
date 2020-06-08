@@ -1,6 +1,8 @@
 package com.onesignal.flutter;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 
 import java.util.HashMap;
 
@@ -53,9 +55,19 @@ abstract class FlutterRegistrarResponder {
       });
    }
 
-   private void runOnMainThread(final Runnable runnable) {
-      ((Activity) flutterRegistrar.activeContext()).runOnUiThread(runnable);
+   static void runOnMainUIThread(Runnable runnable) {
+      if (Looper.getMainLooper().getThread() == Thread.currentThread())
+         runnable.run();
+      else {
+         Handler handler = new Handler(Looper.getMainLooper());
+         handler.post(runnable);
+      }
    }
+//   private void runOnMainThread(final Runnable runnable) {
+//
+//
+//      ((Activity) flutterRegistrar.activeContext()).runOnUiThread(runnable);
+//   }
 
    void invokeMethodOnUiThread(final String methodName, final HashMap map) {
       final MethodChannel channel = this.channel;
